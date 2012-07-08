@@ -16,6 +16,10 @@
  */
 package com.riverdev.twitterreporter;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.spring.Main;
 
@@ -24,7 +28,7 @@ import org.apache.camel.spring.Main;
  */
 public class TwitterBot extends RouteBuilder {
 	
-	private static final double GRIDSIZE = 10.0;
+//	private static final double GRIDSIZE = 10.0;
 
     /**
      * A main() so we can easily run these routing rules in our IDE
@@ -37,7 +41,7 @@ public class TwitterBot extends RouteBuilder {
      * Let's configure the Camel routing rules using Java code...
      */
     public void configure() {
-    	StringBuilder sb = new StringBuilder();
+//    	StringBuilder sb = new StringBuilder();
 		
 //		boolean first = true;
 //		for (double swLat = 25.0; swLat <= 49.0; swLat = swLat + 10.0) {
@@ -52,15 +56,23 @@ public class TwitterBot extends RouteBuilder {
 //				}
 //			}
 //		}
-		
-    	// bemeye account
-		from("twitter://streaming/filter?type=polling"
-				+ "&consumerKey=l2sK4quz0IzWnmTAvkWoQ"
-				+ "&consumerSecret=qz9oC2jENBhNpzynpXeie23ttAGDhWYpU9wDSIbZVXU"
-				+ "&accessToken=107890695-tH3LCcWuGO8XnUIItJXBW9V2uY3avCcjgxHg1BSc"
-				+ "&accessTokenSecret=c5hbrPwMyVWISIllw4SaSDGxywYBk7sxFXoAaosE"
-				+ "&locations=-125,25;-67,49"
-		).to("bean:tweetProcessor?method=process");
+    	
+        try {
+        	URL url = getClass().getResource("/oauth.properties");
+            Properties p = new Properties();
+        	InputStream inStream = url.openStream();
+            p.load(inStream);
+    		
+        	from("twitter://streaming/filter?type=polling"
+    				+ "&consumerKey=" + p.getProperty("consumer.key")
+    				+ "&consumerSecret=" + p.getProperty("consumer.secret")
+    				+ "&accessToken=" + p.getProperty("access.token")
+    				+ "&accessTokenSecret=" + p.getProperty("access.token.secret")
+    				+ "&locations=-125,25;-67,49")
+    				.to("bean:tweetProcessor?method=process");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 }
