@@ -28,7 +28,7 @@ import org.apache.camel.spring.Main;
  */
 public class TwitterBot extends RouteBuilder {
 	
-//	private static final double GRIDSIZE = 10.0;
+	private static final double GRIDSIZE = 10.0;
 
     /**
      * A main() so we can easily run these routing rules in our IDE
@@ -41,21 +41,21 @@ public class TwitterBot extends RouteBuilder {
      * Let's configure the Camel routing rules using Java code...
      */
     public void configure() {
-//    	StringBuilder sb = new StringBuilder();
+    	StringBuilder sb = new StringBuilder();
 		
-//		boolean first = true;
-//		for (double swLat = 25.0; swLat <= 49.0; swLat = swLat + 10.0) {
-//			for (double swLon = -125.0; swLon <= -67.0; swLon = swLon + 10.0) {
-//				double neLat = swLat + GRIDSIZE;
-//				double neLon = swLon + GRIDSIZE;
-//				if (first) {
-//					sb.append(swLon + "," + swLat + ";" + neLon + "," + neLat);
-//					first = false;
-//				} else {
-//					sb.append(";" + swLon + "," + swLat + ";" + neLon + "," + neLat);
-//				}
-//			}
-//		}
+		boolean first = true;
+		for (double swLat = 25.0; swLat <= 49.0; swLat = swLat + GRIDSIZE) {
+			for (double swLon = -125.0; swLon <= -67.0; swLon = swLon + GRIDSIZE) {
+				double neLat = swLat + GRIDSIZE;
+				double neLon = swLon + GRIDSIZE;
+				if (first) {
+					sb.append(swLon + "," + swLat + ";" + neLon + "," + neLat);
+					first = false;
+				} else {
+					sb.append(";" + swLon + "," + swLat + ";" + neLon + "," + neLat);
+				}
+			}
+		}
     	
         try {
         	URL url = getClass().getResource("/oauth.properties");
@@ -68,7 +68,7 @@ public class TwitterBot extends RouteBuilder {
     				+ "&consumerSecret=" + p.getProperty("consumer.secret")
     				+ "&accessToken=" + p.getProperty("access.token")
     				+ "&accessTokenSecret=" + p.getProperty("access.token.secret")
-    				+ "&locations=-125,25;-67,49")
+    				+ "&locations=" + sb.toString())
     				.to("bean:tweetProcessor?method=process");
         } catch (Exception e) {
             e.printStackTrace();
