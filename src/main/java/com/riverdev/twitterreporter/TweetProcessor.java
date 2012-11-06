@@ -1,8 +1,15 @@
 package com.riverdev.twitterreporter;
 
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.camel.Exchange;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.util.Version;
 
 import twitter4j.GeoLocation;
 import twitter4j.Status;
@@ -14,11 +21,11 @@ public class TweetProcessor {
 	private static final Pattern P_REPLY = Pattern.compile("@[^\\s]*");
 	private static final Pattern P_ENCODED = Pattern.compile("&.*;");
 	private static final Pattern P_NON_ALPHANUMERIC = Pattern.compile("[^a-zA-Z0-9\\s]*");
-	private static final Pattern P_NEWLINE = Pattern.compile("\\n+");
-	private static final Pattern P_SPACE = Pattern.compile("\\s+");
 	
 	/** Minimum number of characters left, after cleanup, to be considered. */
-	private static final int MIN_NUM_CHARS = 4;
+	private static final int MIN_NUM_TOKEN_CHARS = 4;
+	
+	private final StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
 	
 	public void process(Exchange exchange) {
 		Status tweet = exchange.getIn().getBody(Status.class);
@@ -33,7 +40,7 @@ public class TweetProcessor {
 			// remove URLs
 			text = P_URL.matcher(text).replaceAll("");
 			
-			// remove replaces
+			// remove replies
 			text = P_REPLY.matcher(text).replaceAll("");
 			
 			// remove XHTML encoded characters
@@ -42,18 +49,35 @@ public class TweetProcessor {
 			// remove non-alphanumeric characters
 			text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
 			
-			// replace newlines with spaces
-			text = P_NEWLINE.matcher(text).replaceAll(" ");
+//			// if enough chars left...
+//			if (text.length() >= MIN_NUM_CHARS) {
+//				System.out.println(text + " (" + tweet.getText() + ")");
+//			}
 			
-			// remove extra spaces
-			text = P_SPACE.matcher(text).replaceAll(" ");
-			
-			// trim whitespace
-			text = text.trim();
-			
-			// if enough chars left...
-			if (text.length() >= MIN_NUM_CHARS) {
-				System.out.println(text + " (" + tweet.getText() + ")");
+			// Lucene StandardAnalyzer
+			TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
+			try {
+				ts.reset();
+				List<String> tokens = new ArrayList<String>();
+				// TODO: System.out and StringBuilder are temporary
+				StringBuilder sb = new StringBuilder();
+				while (ts.incrementToken()) {
+					String term = ts.getAttribute(CharTermAttribute.class).toString();
+					if (term.length() >= MIN_NUM_TOKEN_CHARS) {
+						tokens.add(term);
+						sb.append(term);
+						sb.append(" ");
+					}
+				}
+				if (!tokens.isEmpty()) {
+					System.out.println(sb.toString() + " (" + tweet.getText() + ")");
+				} else {
+					System.out.println("*****REMOVED***** (" + tweet.getText() + ")");
+				}
+				ts.end();
+				ts.close();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

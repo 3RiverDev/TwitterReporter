@@ -70,6 +70,11 @@ public class TwitterBot extends RouteBuilder {
     				+ "&accessTokenSecret=" + p.getProperty("access.token.secret")
     				+ "&locations=" + sb.toString())
     				.to("bean:tweetProcessor?method=process");
+        	
+        	// TODO: additional endpoints/wiretaps needed
+        	// 1.) store original tweets if they were used to identify a topic
+        	// 2.) store topics
+        	// 3+.) ???
         } catch (Exception e) {
             e.printStackTrace();
         }
