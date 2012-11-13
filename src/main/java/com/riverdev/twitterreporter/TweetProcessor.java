@@ -14,6 +14,8 @@ import org.apache.lucene.util.Version;
 import twitter4j.GeoLocation;
 import twitter4j.Status;
 
+import com.riverdev.twitterreporter.data.ProcessedTweet;
+
 public class TweetProcessor {
 	
 	/** Regular expressions used during "noise cleanup" */
@@ -48,37 +50,24 @@ public class TweetProcessor {
 			
 			// remove non-alphanumeric characters
 			text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
-			
-//			// if enough chars left...
-//			if (text.length() >= MIN_NUM_CHARS) {
-//				System.out.println(text + " (" + tweet.getText() + ")");
-//			}
+
+			List<String> tokens = new ArrayList<String>();
 			
 			// Lucene StandardAnalyzer
 			TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
 			try {
 				ts.reset();
-				List<String> tokens = new ArrayList<String>();
-				// TODO: System.out and StringBuilder are temporary
-				StringBuilder sb = new StringBuilder();
 				while (ts.incrementToken()) {
 					String term = ts.getAttribute(CharTermAttribute.class).toString();
 					if (term.length() >= MIN_NUM_TOKEN_CHARS) {
 						tokens.add(term);
-						sb.append(term);
-						sb.append(" ");
 					}
 				}
-				if (!tokens.isEmpty()) {
-					System.out.println(sb.toString() + " (" + tweet.getText() + ")");
-				} else {
-					System.out.println("*****REMOVED***** (" + tweet.getText() + ")");
-				}
-				ts.end();
-				ts.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
+			exchange.getIn().setBody(new ProcessedTweet(tweet, tokens));
 		}
 	}
 }

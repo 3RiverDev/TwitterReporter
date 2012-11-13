@@ -69,12 +69,9 @@ public class TwitterBot extends RouteBuilder {
     				+ "&accessToken=" + p.getProperty("access.token")
     				+ "&accessTokenSecret=" + p.getProperty("access.token.secret")
     				+ "&locations=" + sb.toString())
-    				.to("bean:tweetProcessor?method=process");
-        	
-        	// TODO: additional endpoints/wiretaps needed
-        	// 1.) store original tweets if they were used to identify a topic
-        	// 2.) store topics
-        	// 3+.) ???
+    				// message translator -- creates ProcessedTweet
+    				.beanRef("tweetProcessor", "process")
+    				.to("direct:tweetProcessed");
         } catch (Exception e) {
             e.printStackTrace();
         }

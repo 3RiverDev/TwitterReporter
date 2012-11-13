@@ -26,8 +26,14 @@
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
     <package>com.riverdev.twitterreporter</package>
+    
+       <route>
+	     <from uri="direct:tweetProcessed"/>
+	     <to uri="bean:topicProcessor?method=process"/>
+	  </route>
   </camelContext>
   
   <bean id="tweetProcessor" class="com.riverdev.twitterreporter.TweetProcessor"/> 
+  <bean id="topicProcessor" class="com.riverdev.twitterreporter.TopicProcessor"/> 
 
 </beans>
