@@ -32,6 +32,8 @@ public class TweetProcessor {
 	public void process(Exchange exchange) {
 		Status tweet = exchange.getIn().getBody(Status.class);
 		
+		List<String> tokens = new ArrayList<String>();
+		
 		GeoLocation location = tweet.getGeoLocation();
 		// The tweet must be geotagged.
 		// Skip any accounts flagged with non-English languages.
@@ -51,7 +53,6 @@ public class TweetProcessor {
 			// remove non-alphanumeric characters
 			text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
 
-			List<String> tokens = new ArrayList<String>();
 			
 			// Lucene StandardAnalyzer
 			TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
@@ -66,8 +67,8 @@ public class TweetProcessor {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
-			exchange.getIn().setBody(new ProcessedTweet(tweet, tokens));
 		}
+		
+		exchange.getIn().setBody(new ProcessedTweet(tweet, tokens));
 	}
 }
