@@ -51,6 +51,7 @@
       <artifactId>camel-twitter</artifactId>
       <version>2.10.3-SNAPSHOT</version>
     </dependency>
+    
     <dependency>
        <groupId>org.twitter4j</groupId>
        <artifactId>twitter4j-core</artifactId>
@@ -61,6 +62,12 @@
        <artifactId>twitter4j-stream</artifactId>
        <version>2.2.6</version>
     </dependency>
+    
+    <dependency>
+	    <groupId>org.hibernate</groupId>
+	    <artifactId>hibernate-core</artifactId>
+	    <version>4.1.7.Final</version>
+	</dependency>
     
     <dependency>
 	    <groupId>commons-lang</groupId>
@@ -94,6 +101,13 @@
 	    <groupId>org.apache.lucene</groupId>
 	    <artifactId>lucene-analyzers</artifactId>
 	    <version>3.6.1</version>
+	</dependency>
+	
+	<!-- TODO: This shouldn't be needed. -->
+	<dependency>
+	    <groupId>javax.xml.bind</groupId>
+	    <artifactId>jaxb-api</artifactId>
+	    <version>2.2.7</version>
 	</dependency>
   </dependencies>
 

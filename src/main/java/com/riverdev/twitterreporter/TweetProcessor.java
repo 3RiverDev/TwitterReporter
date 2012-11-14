@@ -69,6 +69,6 @@ public class TweetProcessor {
 			}
 		}
 		
-		exchange.getIn().setBody(new ProcessedTweet(tweet, tokens));
+		exchange.getIn().setBody(ProcessedTweet.create(tweet, tokens));
 	}
 }
