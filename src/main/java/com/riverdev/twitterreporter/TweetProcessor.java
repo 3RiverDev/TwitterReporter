@@ -1,5 +1,7 @@
 package com.riverdev.twitterreporter;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +28,18 @@ public class TweetProcessor {
 	
 	/** Minimum number of characters left, after cleanup, to be considered. */
 	private static final int MIN_NUM_TOKEN_CHARS = 4;
-	
-	private final StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-	
+		
 	public void process(Exchange exchange) {
+		final StandardAnalyzer analyzer;
+		try {
+			analyzer = new StandardAnalyzer(
+				Version.LUCENE_36, new FileReader(
+						new File("stopwords/generated.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+
 		Status tweet = exchange.getIn().getBody(Status.class);
 		
 		List<String> tokens = new ArrayList<String>();
@@ -68,6 +78,8 @@ public class TweetProcessor {
 				e.printStackTrace();
 			}
 		}
+		
+		analyzer.close();
 		
 		exchange.getIn().setBody(ProcessedTweet.create(tweet, tokens));
 	}
