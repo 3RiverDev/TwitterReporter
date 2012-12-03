@@ -1,4 +1,4 @@
-package com.riverdev.twitterreporter.data;
+package org.threeriverdev.twitterreporter.data;
 
 import java.util.List;
 

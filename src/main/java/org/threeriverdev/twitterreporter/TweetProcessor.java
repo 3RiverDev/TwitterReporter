@@ -1,4 +1,4 @@
-package com.riverdev.twitterreporter;
+package org.threeriverdev.twitterreporter;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,11 +12,11 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
+import org.threeriverdev.twitterreporter.data.ProcessedTweet;
 
 import twitter4j.GeoLocation;
 import twitter4j.Status;
 
-import com.riverdev.twitterreporter.data.ProcessedTweet;
 
 public class TweetProcessor {
 	

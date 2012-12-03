@@ -1,4 +1,4 @@
-package com.riverdev.twitterreporter.util;
+package org.threeriverdev.twitterreporter.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
