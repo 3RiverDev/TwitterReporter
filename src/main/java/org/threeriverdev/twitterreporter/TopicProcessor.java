@@ -10,8 +10,7 @@ public class TopicProcessor {
 	public void process(Exchange exchange) {
 		ProcessedTweet pt = exchange.getIn().getBody(ProcessedTweet.class);
 		
-		if (pt.getTokens().size() > 0) {
-			System.out.println(pt.tokensToString() + " (" + pt.getOriginalTweet() + ")");
+		if (pt.getTokens().length > 0) {
 			
 			// TODO: store the whole ProcessedTweet
 //			Session s = null;

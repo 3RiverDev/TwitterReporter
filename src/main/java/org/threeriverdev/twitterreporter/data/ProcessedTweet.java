@@ -13,30 +13,26 @@ import twitter4j.Status;
 
 @Entity
 public class ProcessedTweet {
-
-	private static final String TOSTRING_DELIMITER = " ";
+	
+	private static final char DELIMITER = ',';
 
 	private long id;
-
-	private String originalTweet;
 
 	private double lat;
 
 	private double lon;
 
-	private List<String> tokens;
+	private String originalText;
+
+	private String processedText;
 
 	public static ProcessedTweet create(Status tweet, List<String> tokens) {
 		ProcessedTweet pt = new ProcessedTweet();
-		pt.setOriginalTweet( tweet.getText() );
+		pt.setOriginalText( tweet.getText() );
 		pt.setLat( tweet.getGeoLocation().getLatitude() );
 		pt.setLon( tweet.getGeoLocation().getLongitude() );
-		pt.setTokens( tokens );
+		pt.setProcessedText( StringUtils.join( tokens, DELIMITER ) );
 		return pt;
-	}
-
-	public String tokensToString() {
-		return tokens.size() > 0 ? StringUtils.join( tokens, TOSTRING_DELIMITER ) : "REMOVED";
 	}
 
 	@Id
@@ -49,12 +45,25 @@ public class ProcessedTweet {
 		this.id = id;
 	}
 
-	public String getOriginalTweet() {
-		return originalTweet;
+	public String getOriginalText() {
+		return originalText;
 	}
 
-	public void setOriginalTweet(String originalTweet) {
-		this.originalTweet = originalTweet;
+	public void setOriginalText(String originalText) {
+		this.originalText = originalText;
+	}
+
+	public String getProcessedText() {
+		return processedText;
+	}
+
+	public void setProcessedText(String processedText) {
+		this.processedText = processedText;
+	}
+	
+	@Transient
+	public String[] getTokens() {
+		return StringUtils.split(processedText, DELIMITER);
 	}
 
 	public double getLat() {
@@ -71,14 +80,5 @@ public class ProcessedTweet {
 
 	public void setLon(double lon) {
 		this.lon = lon;
-	}
-
-	@Transient
-	public List<String> getTokens() {
-		return tokens;
-	}
-
-	public void setTokens(List<String> tokens) {
-		this.tokens = tokens;
 	}
 }
