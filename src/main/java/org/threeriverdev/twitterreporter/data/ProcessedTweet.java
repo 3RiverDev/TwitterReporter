@@ -1,5 +1,6 @@
 package org.threeriverdev.twitterreporter.data;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -12,8 +13,10 @@ import org.apache.commons.lang.StringUtils;
 import twitter4j.Status;
 
 @Entity
-public class ProcessedTweet {
+public class ProcessedTweet implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private static final char DELIMITER = ',';
 
 	private long id;

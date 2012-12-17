@@ -55,7 +55,7 @@
     <dependency>
 	    <groupId>org.hibernate</groupId>
 	    <artifactId>hibernate-core</artifactId>
-	    <version>4.1.8.Final</version>
+	    <version>4.1.9.Final</version>
 	</dependency>
     
     <dependency>
@@ -64,7 +64,6 @@
 	    <version>2.6</version>
 	</dependency>
     
-    <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -92,12 +91,11 @@
 	    <version>3.6.1</version>
 	</dependency>
 	
-	<!-- TODO: This shouldn't be needed. -->
-	<dependency>
-	    <groupId>javax.xml.bind</groupId>
-	    <artifactId>jaxb-api</artifactId>
-	    <version>2.2.7</version>
-	</dependency>
+    <dependency>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>9.1-901.jdbc4</version>
+    </dependency>
   </dependencies>
 
   <build>
