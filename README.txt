@@ -17,3 +17,5 @@ The Java/XML system is built on the following:
 - Apache Lucene
 
 CONTRIBUTIONS ARE WELCOME!  Feel free to contact me with any questions!
+
+Licensed under the GNU Lesser General Public License (LGPL) v3.0
