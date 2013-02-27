@@ -6,7 +6,6 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -19,6 +18,8 @@ public class ProcessedTweet implements Serializable {
 
 	private static final char DELIMITER = ',';
 
+	@Id
+	@GeneratedValue
 	private long id;
 
 	private double lat;
@@ -38,8 +39,6 @@ public class ProcessedTweet implements Serializable {
 		return pt;
 	}
 
-	@Id
-	@GeneratedValue
 	public long getId() {
 		return id;
 	}
@@ -64,7 +63,6 @@ public class ProcessedTweet implements Serializable {
 		this.processedText = processedText;
 	}
 	
-	@Transient
 	public String[] getTokens() {
 		return StringUtils.split(processedText, DELIMITER);
 	}

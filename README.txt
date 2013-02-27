@@ -12,7 +12,7 @@ The hope is that stored topics can be displayed on a geographic visualization.  
 
 The Java/XML system is built on the following:
 
-- Apache Camel (camel-twitter plugin)
+- Twitter4J
 - Hibernate ORM
 - Apache Lucene
 

@@ -1,23 +1,22 @@
 package org.threeriverdev.twitterreporter.data;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.metamodel.MetadataSources;
+import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
 
 public class HibernateUtil {
 	
-	private SessionFactory sf;
+	private static SessionFactory sessionFactory;
 	
-	public SessionFactory getSessionFactory() {
-		if (sf == null) {
-			// use hibernate.properties
-			ServiceRegistry sr = new ServiceRegistryBuilder()
-					.configure()
-					.buildServiceRegistry();
-			sf = new MetadataSources(sr)
-					.buildMetadata().buildSessionFactory();
+	public static SessionFactory getSessionFactory() {
+		if (sessionFactory == null) {
+			Configuration configuration = new Configuration();
+	        configuration.configure();
+	        ServiceRegistry serviceRegistry = new ServiceRegistryBuilder()
+	        		.applySettings(configuration.getProperties()).buildServiceRegistry();        
+	        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 		}
-		return sf;
+		return sessionFactory;
 	}
 }
