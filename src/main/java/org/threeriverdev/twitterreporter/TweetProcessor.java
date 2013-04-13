@@ -32,6 +32,12 @@ public class TweetProcessor implements StatusListener {
 	
 	/** Minimum number of characters left, after cleanup, to be considered. */
 	private static final int MIN_NUM_TOKEN_CHARS = 4;
+	
+	private Session session;
+	
+	public TweetProcessor() {
+		session = HibernateUtil.getSessionFactory().openSession();
+	}
 
 	public void onStatus(Status tweet) {
 		final StandardAnalyzer analyzer;
@@ -88,11 +94,9 @@ public class TweetProcessor implements StatusListener {
 //			System.out.println(pt.getProcessedText() + "(lat: " + pt.getLat() + " lon: " + pt.getLon() + " original: " + pt.getOriginalText() + ")");
 			try {
 				// store the whole ProcessedTweet
-				Session s = HibernateUtil.getSessionFactory().openSession();
-				s.beginTransaction();
-				s.persist(pt);
-				s.getTransaction().commit();
-				s.close();
+				session.beginTransaction();
+				session.persist(pt);
+				session.getTransaction().commit();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
