@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -29,8 +30,13 @@ public class TweetProcessor implements StatusListener {
 	private static final Pattern P_REPLY = Pattern.compile("@[^\\s]*");
 	private static final Pattern P_ENCODED = Pattern.compile("&.*;");
 	private static final Pattern P_NON_ALPHANUMERIC = Pattern.compile("[^a-zA-Z0-9\\s]*");
+	private static final Pattern P_WHITESPACE = Pattern.compile("\\s+");
+	
+	/** US-ASCII range */
+	private static final Pattern P_ASCII_NON_PRINTABLE = Pattern.compile(".*[^\\x20-\\x7E]+.*");
 	
 	/** Minimum number of characters left, after cleanup, to be considered. */
+	// TODO: Currently flags things like ... and the stylized left and right double quotes
 	private static final int MIN_NUM_TOKEN_CHARS = 4;
 	
 	private Session session;
@@ -45,36 +51,37 @@ public class TweetProcessor implements StatusListener {
 			analyzer = new StandardAnalyzer(
 				Version.LUCENE_36, new FileReader(
 						new File("stopwords/generated.txt")));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
 
-		List<String> tokens = new ArrayList<String>();
-		
-		GeoLocation location = tweet.getGeoLocation();
-		// The tweet must be geotagged.
-		// Skip any accounts flagged with non-English languages.
-		// TODO: Skip anything with non-USASCII characters?  c3-ff
-		if (location != null && tweet.getUser().getLang().equals("en")) {
-			String text = tweet.getText();
+			List<String> tokens = new ArrayList<String>();
 			
-			// remove URLs
-			text = P_URL.matcher(text).replaceAll("");
-			
-			// remove replies
-			text = P_REPLY.matcher(text).replaceAll("");
-			
-			// remove XHTML encoded characters
-			text = P_ENCODED.matcher(text).replaceAll("");
-			
-			// remove non-alphanumeric characters
-			text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
-
-			
-			// Lucene StandardAnalyzer
-			TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
-			try {
+			GeoLocation location = tweet.getGeoLocation();
+			// The tweet must be geotagged.
+			// Skip any accounts flagged with non-English languages.
+			if (location != null && tweet.getUser().getLang().equals("en")) {
+				String text = tweet.getText();
+				
+				// replace whitespace with single spaces (easier to parse)
+				text = P_WHITESPACE.matcher(text).replaceAll(" ");
+				
+				// skip anything with non-printable ASCII characters
+				if (P_ASCII_NON_PRINTABLE.matcher(text).matches()) {
+					return;
+				}
+				
+				// remove URLs
+				text = P_URL.matcher(text).replaceAll("");
+				
+				// remove replies
+				text = P_REPLY.matcher(text).replaceAll("");
+				
+				// remove XHTML encoded characters
+				text = P_ENCODED.matcher(text).replaceAll("");
+				
+				// remove non-alphanumeric characters
+				text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
+				
+				// Lucene StandardAnalyzer
+				TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
 				ts.reset();
 				while (ts.incrementToken()) {
 					String term = ts.getAttribute(CharTermAttribute.class).toString();
@@ -82,24 +89,20 @@ public class TweetProcessor implements StatusListener {
 						tokens.add(term);
 					}
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				
+				analyzer.close();
+				
+				if (tokens.size() > 0) {
+					ProcessedTweet pt = ProcessedTweet.create(tweet, tokens);
+//					System.out.println(pt.getProcessedText() + "(lat: " + pt.getLat() + " lon: " + pt.getLon() + " original: " + pt.getOriginalText() + ")");
+					// store the whole ProcessedTweet
+					session.beginTransaction();
+					session.persist(pt);
+					session.getTransaction().commit();
+				}
 			}
-		}
-		
-		analyzer.close();
-		
-		if (tokens.size() > 0) {
-			ProcessedTweet pt = ProcessedTweet.create(tweet, tokens);
-//			System.out.println(pt.getProcessedText() + "(lat: " + pt.getLat() + " lon: " + pt.getLon() + " original: " + pt.getOriginalText() + ")");
-			try {
-				// store the whole ProcessedTweet
-				session.beginTransaction();
-				session.persist(pt);
-				session.getTransaction().commit();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
