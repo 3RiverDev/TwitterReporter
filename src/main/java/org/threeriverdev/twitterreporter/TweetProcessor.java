@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -103,6 +102,8 @@ public class TweetProcessor implements StatusListener {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			session.clear();
 		}
 	}
 
