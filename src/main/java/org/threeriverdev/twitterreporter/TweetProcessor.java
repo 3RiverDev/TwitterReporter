@@ -27,15 +27,16 @@ public class TweetProcessor implements StatusListener {
 	/** Regular expressions used during "noise cleanup" */
 	private static final Pattern P_URL = Pattern.compile("(http:\\/\\/|https:\\/\\/)?([a-zA-Z0-9\\-_]+\\.)+[a-zA-Z0-9\\-_]+(\\/[A-Za-z0-9\\-_%&\\?\\/.=]*)*");
 	private static final Pattern P_REPLY = Pattern.compile("@[^\\s]*");
+	private static final Pattern P_HASHTAG = Pattern.compile("#[^\\s]*");
 	private static final Pattern P_ENCODED = Pattern.compile("&.*;");
 	private static final Pattern P_NON_ALPHANUMERIC = Pattern.compile("[^a-zA-Z0-9\\s]*");
 	private static final Pattern P_WHITESPACE = Pattern.compile("\\s+");
 	
 	/** US-ASCII range */
+	// TODO: Currently flags things like ... and the stylized left and right double quotes
 	private static final Pattern P_ASCII_NON_PRINTABLE = Pattern.compile(".*[^\\x20-\\x7E]+.*");
 	
 	/** Minimum number of characters left, after cleanup, to be considered. */
-	// TODO: Currently flags things like ... and the stylized left and right double quotes
 	private static final int MIN_NUM_TOKEN_CHARS = 4;
 	
 	private Session session;
@@ -73,6 +74,9 @@ public class TweetProcessor implements StatusListener {
 				// remove replies
 				text = P_REPLY.matcher(text).replaceAll("");
 				
+				// remove hashtags
+				text = P_HASHTAG.matcher(text).replaceAll("");
+				
 				// remove XHTML encoded characters
 				text = P_ENCODED.matcher(text).replaceAll("");
 				
@@ -102,6 +106,7 @@ public class TweetProcessor implements StatusListener {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			session.getTransaction().rollback();
 		} finally {
 			session.clear();
 		}

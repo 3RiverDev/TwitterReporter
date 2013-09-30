@@ -1,8 +1,10 @@
 package org.threeriverdev.twitterreporter.data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,6 +31,8 @@ public class ProcessedTweet implements Serializable {
 	private String originalText;
 
 	private String processedText;
+	
+	private Date timestamp;
 
 	public static ProcessedTweet create(Status tweet, List<String> tokens) {
 		ProcessedTweet pt = new ProcessedTweet();
@@ -36,6 +40,7 @@ public class ProcessedTweet implements Serializable {
 		pt.setLat( tweet.getGeoLocation().getLatitude() );
 		pt.setLon( tweet.getGeoLocation().getLongitude() );
 		pt.setProcessedText( StringUtils.join( tokens, DELIMITER ) );
+		pt.setTimestamp(new Date());
 		return pt;
 	}
 
@@ -81,5 +86,13 @@ public class ProcessedTweet implements Serializable {
 
 	public void setLon(double lon) {
 		this.lon = lon;
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 }
