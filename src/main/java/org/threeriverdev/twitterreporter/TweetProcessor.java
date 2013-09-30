@@ -39,22 +39,21 @@ public class TweetProcessor implements StatusListener {
 	/** Minimum number of characters left, after cleanup, to be considered. */
 	private static final int MIN_NUM_TOKEN_CHARS = 4;
 	
-	private Session session;
+	private StandardAnalyzer analyzer;
 	
 	public TweetProcessor() {
-		session = HibernateUtil.getSessionFactory().openSession();
-	}
-
-	public void onStatus(Status tweet) {
-		final StandardAnalyzer analyzer;
 		try {
 			analyzer = new StandardAnalyzer(
-				Version.LUCENE_36, new FileReader(
-						new File("stopwords/generated.txt")));
+					Version.LUCENE_36, new FileReader(
+							new File("stopwords/generated.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-			List<String> tokens = new ArrayList<String>();
-			
-			GeoLocation location = tweet.getGeoLocation();
+	public void onStatus(final Status tweet) {
+		try {
+			final GeoLocation location = tweet.getGeoLocation();
 			// The tweet must be geotagged.
 			// Skip any accounts flagged with non-English languages.
 			if (location != null && tweet.getUser().getLang().equals("en")) {
@@ -83,32 +82,49 @@ public class TweetProcessor implements StatusListener {
 				// remove non-alphanumeric characters
 				text = P_NON_ALPHANUMERIC.matcher(text).replaceAll("");
 				
-				// Lucene StandardAnalyzer
-				TokenStream ts = analyzer.tokenStream("contents", new StringReader(text));
-				ts.reset();
-				while (ts.incrementToken()) {
-					String term = ts.getAttribute(CharTermAttribute.class).toString();
-					if (term.length() >= MIN_NUM_TOKEN_CHARS) {
-						tokens.add(term);
-					}
-				}
+				final String cleanText = text;
 				
-				analyzer.close();
-				
-				if (tokens.size() > 0) {
-					ProcessedTweet pt = ProcessedTweet.create(tweet, tokens);
-//					System.out.println(pt.getProcessedText() + "(lat: " + pt.getLat() + " lon: " + pt.getLon() + " original: " + pt.getOriginalText() + ")");
-					// store the whole ProcessedTweet
-					session.beginTransaction();
-					session.persist(pt);
-					session.getTransaction().commit();
+				// try to skip a few of them...
+				if (cleanText.length() >= MIN_NUM_TOKEN_CHARS) {
+					new Thread() {
+						public void run() {
+							try {
+								final List<String> tokens = new ArrayList<String>();
+								// Lucene StandardAnalyzer
+								final TokenStream ts = analyzer.tokenStream("contents", new StringReader(cleanText));
+								ts.reset();
+								while (ts.incrementToken()) {
+									final String term = ts.getAttribute(CharTermAttribute.class).toString();
+									if (term.length() >= MIN_NUM_TOKEN_CHARS) {
+										tokens.add(term);
+									}
+								}
+								
+								if (tokens.size() > 0) {
+									ProcessedTweet pt = ProcessedTweet.create(tweet, tokens);
+				//					System.out.println(pt.getProcessedText() + "(lat: " + pt.getLat() + " lon: " + pt.getLon() + " original: " + pt.getOriginalText() + ")");
+									// store the whole ProcessedTweet
+									final Session session = HibernateUtil.getSessionFactory().openSession();
+									try {
+										session.beginTransaction();
+										session.persist(pt);
+										session.getTransaction().commit();
+									} catch (Exception e) {
+										e.printStackTrace();
+										session.getTransaction().rollback();
+									} finally {
+										session.close();
+									}
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}.run();
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			session.getTransaction().rollback();
-		} finally {
-			session.clear();
 		}
 	}
 

@@ -39,6 +39,9 @@ public class TwitterBot {
         FilterQuery query = new FilterQuery();
         List<double[]> locations = new ArrayList<double[]>();
         
+        // Create a grid over the continental US.
+        // TODO: Originally (2009ish), these were recommended by Twitter.  Not sure if it's relevant now or not --
+        // could we achieve the same results with 1 big block?
     	for (double swLat = 25.0; swLat <= 49.0; swLat = swLat + GRIDSIZE) {
 			for (double swLon = -125.0; swLon <= -67.0; swLon = swLon + GRIDSIZE) {
 				double neLat = swLat + GRIDSIZE;
